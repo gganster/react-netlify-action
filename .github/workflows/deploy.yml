@@ -31,8 +31,18 @@ jobs:
           path: dist
           retention-days: 1
 
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Install dependencies
+        run: npm ci
+      - name: Lint
+        run: npm run lint
+
   deploy:
-    needs: build
+    needs: [build, lint]
     runs-on: ubuntu-latest
     steps:
       - name: Download build artifacts
@@ -43,9 +53,22 @@ jobs:
       
       - name: Install Netlify CLI
         run: npm install -g netlify-cli
-      
+
       - name: Deploy to Netlify
         env:
           NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
           NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
         run: netlify deploy --prod --dir=dist
+
+  ecoindex:
+    needs: deploy
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        
+      - name: Run Ecoindex test
+        uses: vincent-ledu/ecoindex-cli-action@v1
+        with:
+          url: 'https://celadon-cascaron-31c8b3.netlify.app/'
+          wait: 2000
