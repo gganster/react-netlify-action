@@ -62,13 +62,17 @@ jobs:
 
   ecoindex:
     needs: deploy
-    runs-on: ubuntu-latest
+    runs-on: vvatelot/ecoindex-cli
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
         
       - name: Run Ecoindex test
-        uses: vincent-ledu/ecoindex-cli-action@v1
+        run: ecoindex-cli analyze --url https://celadon-cascaron-31c8b3.netlify.app --recursive --html-report 
+      
+      - name: Upload report artifacts
+        uses: actions/upload-artifact@v4
         with:
-          url: 'https://celadon-cascaron-31c8b3.netlify.app/'
-          wait: 2000
+          name: ecoindex-report
+          path: /tmp/ecoindex-cli
+          retention-days: 1
+
+  
